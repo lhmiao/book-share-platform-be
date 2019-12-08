@@ -16,5 +16,9 @@ export default () => {
     },
   };
 
+  config.security = {
+    csrf: { enable: false },
+  };
+
   return config;
 };
