@@ -1,13 +1,13 @@
 import { Context } from 'egg';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { ERROR_CODE } from '../constant';
-import validateRuleObject, { PathValidateRule } from '../validateRule';
+import validateRuleObject from '../validateRule';
 
 export default function validateParams(): any {
   return async (ctx: Context, next: () => Promise<any>) => {
     try {
       const { method, path } = ctx;
-      const rule: PathValidateRule|undefined = _.get(
+      const rule: object|undefined = _.get(
         validateRuleObject,
         `[${method.toLocaleLowerCase()}][${path}]`,
       );

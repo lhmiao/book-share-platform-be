@@ -5,9 +5,8 @@ export default function processResBody(): any {
   return async (ctx: Context, next: () => Promise<any>) => {
     await next();
     if (ctx.body === undefined) return;
-    const needProcess: boolean = !Object
-      .keys(ctx.body)
-      .every(key => RES_BODY_KEYS.includes(key));
+    const bodyKeys: string[] = Object.keys(ctx.body);
+    const needProcess: boolean = !RES_BODY_KEYS.every(key => bodyKeys.includes(key));
     if (needProcess) {
       const data: string|object = ctx.body;
       ctx.body = {
