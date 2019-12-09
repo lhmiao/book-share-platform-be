@@ -1,24 +1,8 @@
 import { Controller } from 'egg';
 import _ from 'lodash';
-import { ERROR_CODE, LOGIN_COOKIE_MAX_AGE } from '../constant';
+import { ERROR_CODE } from '../constant';
 
 export default class UserController extends Controller {
-  private setLoginCookie(userId: number|string) {
-    this.ctx.cookies.set('user_id', `${userId}`, {
-      httpOnly: true,
-      encrypt: true,
-      maxAge: LOGIN_COOKIE_MAX_AGE,
-    });
-  }
-
-  private clearLoginCookie() {
-    this.ctx.cookies.set('user_id', '', { maxAge: 0 });
-  }
-
-  private getLoginCookie(): string {
-    return this.ctx.cookies.get('user_id', { encrypt: true });
-  }
-
   async login() {
     try {
       const where = this.ctx.request.body;
@@ -26,7 +10,7 @@ export default class UserController extends Controller {
         attributes: { exclude: ['securityAnswer', 'password'] },
       };
       const userInfo = await this.service.user.getUserInfo(where, opts);
-      this.setLoginCookie(userInfo.id);
+      this.service.user.setLoginCookie(userInfo.id);
       this.ctx.body = userInfo;
     } catch (error) {
       this.logger.error(error);
@@ -40,7 +24,7 @@ export default class UserController extends Controller {
 
   async logout() {
     try {
-      this.clearLoginCookie();
+      this.service.user.clearLoginCookie();
       this.ctx.body = '';
     } catch (error) {
       this.logger.error(error);
@@ -56,7 +40,7 @@ export default class UserController extends Controller {
     try {
       const params = _.omit(this.ctx.request.body, ['id', 'coinNumber']);
       const userInfo = await this.service.user.create(params);
-      this.setLoginCookie(userInfo.id);
+      this.service.user.setLoginCookie(userInfo.id);
       this.ctx.body = userInfo;
     } catch (error) {
       this.logger.error(error);
@@ -71,7 +55,7 @@ export default class UserController extends Controller {
   async updateUser() {
     try {
       const params = _.omit(this.ctx.request.body, ['id', 'securityQuestion', 'securityAnswer', 'coinNumber']);
-      const userId = this.getLoginCookie();
+      const userId = this.service.user.getLoginCookie();
       await this.service.user.update(params, { id: userId });
       this.ctx.body = params;
     } catch (error) {
@@ -101,7 +85,7 @@ export default class UserController extends Controller {
 
   async updatePassword() {
     try {
-      const userId = this.getLoginCookie();
+      const userId = this.service.user.getLoginCookie();
       const where = { id: userId };
       const opts = { attributes: ['securityAnswer'] };
       const { securityAnswer: correctAnswer } = await this.service.user.getUserInfo(where, opts);
@@ -115,7 +99,7 @@ export default class UserController extends Controller {
         return;
       }
       await this.service.user.update({ password }, where);
-      this.clearLoginCookie();
+      this.service.user.clearLoginCookie();
       this.ctx.body = '';
     } catch (error) {
       this.logger.error(error);

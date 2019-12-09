@@ -3,7 +3,7 @@ import { NEED_LOGIN_CODE } from '../constant';
 
 export default function checkLogin(): any {
   return async (ctx: Context, next: () => Promise<any>) => {
-    const userId: string = ctx.cookies.get('user_id', { encrypt: true });
+    const userId: string = ctx.service.user.getLoginCookie();
     if (!userId) {
       ctx.body = {
         code: NEED_LOGIN_CODE,
