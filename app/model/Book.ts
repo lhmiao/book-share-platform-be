@@ -8,8 +8,8 @@ export default app => {
       primaryKey: true,
       autoIncrement: true,
     },
-    name: {
-      field: 'name',
+    bookName: {
+      field: 'book_name',
       type: STRING(50),
       allowNull: false,
     },
@@ -23,12 +23,35 @@ export default app => {
       type: BLOB,
       allowNull: true,
     },
-    infoChain: {
-      field: 'info_chain',
+    recordChain: {
+      field: 'record_chain',
       type: JSON_TYPE,
+      allowNull: false,
+      get() {
+        const result = (this as any).getDataValue('recordChain');
+        // update 的时候也会触发 get，为兼容没有更新的情况
+        if (result) return result.recordChain;
+        return result;
+      },
+      set(recordChain: object[]) {
+        (this as any).setDataValue('recordChain', { recordChain });
+      },
+    },
+    keeperId: {
+      field: 'keeper_id',
+      type: INTEGER,
       allowNull: false,
     },
   });
+
+  Book.associate = () => {
+    Book.belongsTo(app.model.User, {
+      foreignKey: 'keeperId',
+      targetKey: 'id',
+      constraints: false,
+      as: 'keeper',
+    });
+  };
 
   return Book;
 };
