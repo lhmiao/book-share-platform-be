@@ -1,7 +1,7 @@
 import { Service } from 'egg';
 import { LOGIN_COOKIE_MAX_AGE } from '../constant';
 
-interface UserInfo {
+export interface UserInfo {
   id?: number|string;
   username?: string;
   password?: string;
