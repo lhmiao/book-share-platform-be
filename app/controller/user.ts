@@ -5,13 +5,26 @@ import { ERROR_CODE } from '../constant';
 export default class UserController extends Controller {
   async login() {
     try {
-      const where = this.ctx.request.body;
-      const opts = {
-        attributes: { exclude: ['securityAnswer', 'password'] },
-      };
-      const userInfo = await this.service.user.getUserInfo(where, opts);
+      const { username, password } = this.ctx.request.body;
+      const userInfo = await this.service.user.getUserInfo({ username });
+      if (!userInfo) {
+        this.ctx.body = {
+          code: ERROR_CODE,
+          message: '用户不存在',
+          data: '',
+        };
+        return;
+      }
+      if (password !== userInfo.password) {
+        this.ctx.body = {
+          code: ERROR_CODE,
+          message: '密码错误',
+          data: '',
+        };
+        return;
+      }
       this.service.user.setLoginCookie(userInfo.id);
-      this.ctx.body = userInfo;
+      this.ctx.body = _.omit(userInfo, ['securityAnswer', 'password']);
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
