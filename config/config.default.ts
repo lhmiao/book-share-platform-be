@@ -5,7 +5,7 @@ export default (appInfo: EggAppInfo) => {
 
   config.keys = appInfo.name + '_1575555836150_5185';
 
-  config.middleware = ['processResBody', 'checkLogin', 'validateParams'];
+  config.middleware = ['processResBody', 'checkLogin'];
 
   config.checkLogin = {
     ignore: [ // 登录、注册、获取安全问题接口不检测登录状态

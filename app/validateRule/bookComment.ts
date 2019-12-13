@@ -24,8 +24,8 @@ export default {
     '/api/v1/book_comment/:bookCommentId/action': {
       bookCommentId: 'id',
       action: {
-        type: 'number',
-        // format: /^(like|dislike)$/,
+        type: 'string',
+        format: /^(like|dislike)$/,
       },
     },
   },
