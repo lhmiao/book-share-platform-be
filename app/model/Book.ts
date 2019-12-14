@@ -42,6 +42,11 @@ export default app => {
       type: INTEGER,
       allowNull: false,
     },
+    price: {
+      field: 'price',
+      type: INTEGER,
+      allowNull: false,
+    },
   });
 
   Book.associate = () => {

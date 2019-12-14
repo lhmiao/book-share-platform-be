@@ -52,7 +52,7 @@ export default class BookController extends Controller {
 
   async createBook() {
     try {
-      const createBookKeys = ['bookName', 'intro', 'picture'];
+      const createBookKeys = ['bookName', 'intro', 'picture', 'price'];
       const params = _.pick(this.ctx.request.body, createBookKeys);
       params.keeperId = this.service.user.getLoginCookie();
       const chain = new this.ctx.Chain();
@@ -73,7 +73,7 @@ export default class BookController extends Controller {
   async updateBook() {
     try {
       const { bookId } = this.ctx.params;
-      const updateBookKeys = ['bookName', 'intro', 'picture', 'keeperId'];
+      const updateBookKeys = ['bookName', 'intro', 'picture', 'keeperId', 'price'];
       const params = _.pick(this.ctx.request.body, updateBookKeys);
       const { recordChain, ...restInfo } = await this.service.book.getBookInfo(bookId, true);
       const loginUserId = this.service.user.getLoginCookie();
@@ -92,6 +92,7 @@ export default class BookController extends Controller {
           bookName: '图书名',
           intro: '简介',
           keeperId: '持有者',
+          price: '价格',
         };
         let prevKeeperUsername: string;
         let curKeeperUsername: string;

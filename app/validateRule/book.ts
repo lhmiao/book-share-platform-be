@@ -25,6 +25,7 @@ export default {
     '/api/v1/book': {
       bookName: { type: 'string', max: 50 },
       intro: 'string',
+      price: { type: 'number', min: 0 },
     },
   },
   put: {
@@ -36,6 +37,7 @@ export default {
       },
       intro: { type: 'string', required: false },
       keeperId: { type: 'number', required: false },
+      price: { type: 'number', min: 0 },
     },
   },
 } as RuleObject;
