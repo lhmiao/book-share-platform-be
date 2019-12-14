@@ -39,7 +39,8 @@ export default class BookController extends Controller {
   async getBookRecordChain() {
     try {
       const { bookId } = this.ctx.params;
-      this.ctx.body = await this.service.book.getBookRecordChain(bookId);
+      const recordChain = await this.service.book.getBookRecordChain(bookId);
+      this.ctx.body = recordChain.map(({ data, timestamp }) => ({ data, timestamp }));
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
@@ -58,7 +59,8 @@ export default class BookController extends Controller {
       const chain = new this.ctx.Chain();
       chain.addBlock('创建图书');
       params.recordChain = chain.getValue();
-      this.ctx.body = await this.service.book.createBook(params);
+      const record = await this.service.book.createBook(params);
+      this.ctx.body = _.omit(record, ['recordChain']);
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
@@ -106,7 +108,7 @@ export default class BookController extends Controller {
         params.recordChain = chain.getValue();
         await this.service.book.updateBook(params, { id: bookId });
       }
-      this.ctx.body = params;
+      this.ctx.body = _.omit(params, ['recordChain']);
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
