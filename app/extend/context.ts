@@ -1,4 +1,5 @@
 import SHA256 from 'crypto-js/sha256';
+import ms from 'ms';
 
 interface ChainBlock {
   prevHash: string;
@@ -39,3 +40,12 @@ export class Chain {
     return this.recordChain;
   }
 }
+
+export const constant = {
+  SUCCESS_CODE: 0,
+  ERROR_CODE: 1,
+  NEED_LOGIN_CODE: 2,
+  NO_AUTH_CODE: 3,
+  RES_BODY_KEYS: ['code', 'message', 'data'],
+  LOGIN_COOKIE_MAX_AGE: ms('7d'),
+};

@@ -1,6 +1,5 @@
 import { Controller } from 'egg';
 import _ from 'lodash';
-import { ERROR_CODE } from '../constant';
 
 export default class UserController extends Controller {
   async login() {
@@ -9,7 +8,7 @@ export default class UserController extends Controller {
       const userInfo = await this.service.user.getUserInfo({ username });
       if (!userInfo) {
         this.ctx.body = {
-          code: ERROR_CODE,
+          code: this.ctx.constant.ERROR_CODE,
           message: '用户不存在',
           data: '',
         };
@@ -17,7 +16,7 @@ export default class UserController extends Controller {
       }
       if (password !== userInfo.password) {
         this.ctx.body = {
-          code: ERROR_CODE,
+          code: this.ctx.constant.ERROR_CODE,
           message: '密码错误',
           data: '',
         };
@@ -28,7 +27,7 @@ export default class UserController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -42,7 +41,7 @@ export default class UserController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -62,7 +61,7 @@ export default class UserController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -79,7 +78,7 @@ export default class UserController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -89,12 +88,12 @@ export default class UserController extends Controller {
   async getSecurityQuestion() {
     try {
       const where = this.ctx.query;
-      const opts = { attributes: ['securityQuestion'] };
-      this.ctx.body = await this.service.user.getUserInfo(where, opts);
+      const userInfo = await this.service.user.getUserInfo(where);
+      this.ctx.body = _.pick(userInfo, ['securityQuestion']);
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -105,12 +104,11 @@ export default class UserController extends Controller {
     try {
       const userId = this.service.user.getLoginCookie();
       const where = { id: userId };
-      const opts = { attributes: ['securityAnswer'] };
-      const { securityAnswer: correctAnswer } = await this.service.user.getUserInfo(where, opts);
+      const { securityAnswer: correctAnswer } = await this.service.user.getUserInfo(where);
       const { securityAnswer: needValidateAnswer, password } = this.ctx.request.body;
       if (correctAnswer !== needValidateAnswer) {
         this.ctx.body = {
-          code: ERROR_CODE,
+          code: this.ctx.constant.ERROR_CODE,
           message: '安全问题答案错误',
           data: '',
         };
@@ -122,7 +120,7 @@ export default class UserController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };

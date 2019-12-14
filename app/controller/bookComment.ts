@@ -1,7 +1,6 @@
 import { Controller } from 'egg';
 import _ from 'lodash';
 import moment from 'moment';
-import { ERROR_CODE } from '../constant';
 
 export default class BookCommentController extends Controller {
   async getBookCommentList() {
@@ -16,7 +15,7 @@ export default class BookCommentController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -41,7 +40,7 @@ export default class BookCommentController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -51,6 +50,16 @@ export default class BookCommentController extends Controller {
   async updateBookComment() {
     try {
       const { bookCommentId } = this.ctx.params;
+      const { userId } = await this.service.bookComment.getBookCommentInfo(bookCommentId);
+      const loginUserId = this.service.user.getLoginCookie();
+      if (Number(userId) !== Number(loginUserId)) {
+        this.ctx.body = {
+          code: this.ctx.constant.NO_AUTH_CODE,
+          message: '暂无权限',
+          data: '',
+        };
+        return;
+      }
       const { content } = this.ctx.request.body;
       const updatedAt = moment().format('YYYY-MM-DD hh:mm:ss');
       const record = { content, updatedAt };
@@ -60,7 +69,7 @@ export default class BookCommentController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -76,7 +85,7 @@ export default class BookCommentController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };

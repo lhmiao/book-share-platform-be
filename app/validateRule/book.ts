@@ -17,6 +17,9 @@ export default {
     '/api/v1/book/:bookId': {
       bookId: 'id',
     },
+    '/api/v1/book/:bookId/record_chain': {
+      bookId: 'id',
+    },
   },
   post: {
     '/api/v1/book': {

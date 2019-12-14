@@ -1,6 +1,5 @@
 import { Controller } from 'egg';
 import _ from 'lodash';
-import { ERROR_CODE } from '../constant';
 
 export default class BookController extends Controller {
   async getBookList() {
@@ -15,7 +14,7 @@ export default class BookController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -29,7 +28,7 @@ export default class BookController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -44,7 +43,7 @@ export default class BookController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -64,7 +63,7 @@ export default class BookController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };
@@ -77,6 +76,15 @@ export default class BookController extends Controller {
       const updateBookKeys = ['bookName', 'intro', 'picture', 'keeperId'];
       const params = _.pick(this.ctx.request.body, updateBookKeys);
       const { recordChain, ...restInfo } = await this.service.book.getBookInfo(bookId, true);
+      const loginUserId = this.service.user.getLoginCookie();
+      if (Number(loginUserId) !== restInfo.keeperId) {
+        this.ctx.body = {
+          code: this.ctx.constant.NO_AUTH_CODE,
+          message: '暂无权限',
+          data: '',
+        };
+        return;
+      }
       const diff = this.ctx.helper.diffObj(params, restInfo, ['picture']);
       if (diff) {
         const chain = new this.ctx.Chain(recordChain);
@@ -112,7 +120,7 @@ export default class BookController extends Controller {
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
-        code: ERROR_CODE,
+        code: this.ctx.constant.ERROR_CODE,
         message: error.name,
         data: '',
       };

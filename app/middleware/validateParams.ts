@@ -1,6 +1,5 @@
 import { Context } from 'egg';
 import _ from 'lodash';
-import { ERROR_CODE } from '../constant';
 import validateRuleObject from '../validateRule';
 
 // 这个中间件用在 router
@@ -24,7 +23,7 @@ export default function validateParams(): any {
     } catch (error) {
       ctx.logger.error(error);
       ctx.body = {
-        code: ERROR_CODE,
+        code: ctx.constant.ERROR_CODE,
         message: '请求参数校验失败',
         data: error.errors,
       };
