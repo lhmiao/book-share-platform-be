@@ -40,17 +40,30 @@ export default class BookService extends Service {
     return { bookList, pageInfo };
   }
 
-  async getBookInfo(bookId: string|number) {
+  async getBookInfo(bookId: string|number, needRecordChain: boolean = false) {
+    const exclude: string[] = ['keeperId'];
+    if (!needRecordChain) exclude.push('recordChain');
     const record = await this.ctx.model.Book.findOne({
       where: { id: bookId },
-      attributes: { exclude: ['keeperId'] },
+      attributes: { exclude },
       include: [{
         model: this.ctx.model.User,
         attributes: ['id', 'username', 'phone', 'qq', 'wechat', 'avatar'],
         as: 'keeper',
       }],
     });
-    return record && record.get({ plain: true });
+    if (!record) return Promise.reject({ name: `id 为${bookId}的图书不存在` });
+    return record.get({ plain: true });
+  }
+
+  async getBookRecordChain(bookId: string|number) {
+    const record = await this.ctx.model.Book.findOne({
+      where: { id: bookId },
+      attributes: ['recordChain'],
+    });
+    if (!record) return Promise.reject({ name: `id 为${bookId}的图书不存在` });
+    const { recordChain } = record.get({ plain: true });
+    return recordChain;
   }
 
   async createBook(record: BookInfo) {
