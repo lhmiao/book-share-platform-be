@@ -26,6 +26,7 @@ export default {
       bookName: { type: 'string', max: 50 },
       intro: 'string',
       price: { type: 'number', min: 0 },
+      onSell: 'boolean',
     },
   },
   put: {
@@ -36,8 +37,8 @@ export default {
         required: false,
       },
       intro: { type: 'string', required: false },
-      keeperId: { type: 'number', required: false },
-      price: { type: 'number', min: 0 },
+      price: { type: 'number', min: 0, required: false },
+      onSell: { type: 'boolean', required: false },
     },
   },
 } as RuleObject;
