@@ -47,6 +47,20 @@ export default app => {
       type: INTEGER,
       allowNull: false,
     },
+    onSell: {
+      field: 'on_sell',
+      type: INTEGER,
+      allowNull: false,
+      get() {
+        const onSell = (this as any).getDataValue('onSell');
+        // update 的时候也会触发 get，为兼容没有更新的情况
+        if (onSell === undefined) return onSell;
+        return !!onSell;
+      },
+      set(onSell: boolean) {
+        (this as any).setDataValue('onSell', onSell ? 1 : 0);
+      },
+    },
   });
 
   Book.associate = () => {
