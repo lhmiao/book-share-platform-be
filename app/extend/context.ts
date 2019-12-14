@@ -48,4 +48,7 @@ export const constant = {
   NO_AUTH_CODE: 3,
   RES_BODY_KEYS: ['code', 'message', 'data'],
   LOGIN_COOKIE_MAX_AGE: ms('7d'),
+  CREATE_BOOK_CHANGE_NUMBER: 5,
+  CREATE_BOOK_COMMENT_CHANGE_NUMBER: 3,
+  CREATE_BOOK_COMMENT_ACTION_CHANGE_NUMBER: 1,
 };

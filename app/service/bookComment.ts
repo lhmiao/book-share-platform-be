@@ -1,4 +1,5 @@
 import { Service } from 'egg';
+import _ from 'lodash';
 
 export interface BookCommentRecord {
   id?: number|string;
@@ -67,32 +68,71 @@ export default class BookCommentService extends Service {
     return { bookCommentList, pageInfo };
   }
 
-  async getBookCommentInfo(bookCommentId: number|string) {
-    const where = { id: bookCommentId };
+  async getBookCommentInfo(where: object) {
     const record = await this.ctx.model.BookComment.findOne({ where });
-    if (!record) return Promise.reject({ name: `id 为${bookCommentId}的评论不存在` });
+    if (!record) return Promise.reject({ name: '该评论不存在' });
     return record.get({ plain: true });
   }
 
-  async createBookComment(record: BookCommentRecord) {
-    const result = await this.ctx.model.BookComment.create(record);
+  async createBookComment(record: BookCommentRecord, opts: object = {}) {
+    let isFirstCommentThisBook: boolean;
+    try {
+      const where = _.pick(record, ['bookId', 'userId']);
+      await this.getBookCommentInfo(where);
+      isFirstCommentThisBook = false;
+    } catch (error) {
+      isFirstCommentThisBook = true;
+    }
+    const result = await this.ctx.model.transaction(async t => {
+      const result = await this.ctx.model.BookComment.create(record, { ...opts, transaction: t });
+      if (isFirstCommentThisBook) {
+        const loginUserId = this.service.user.getLoginCookie();
+        await this.service.user.updateUserCoinNumber(
+          loginUserId,
+          this.ctx.constant.CREATE_BOOK_COMMENT_CHANGE_NUMBER,
+          { transaction: t },
+        );
+      }
+      return result;
+    });
     return result.get({ plain: true });
   }
 
-  updateBookComment(record: BookCommentRecord, where: BookCommentRecord) {
-    return this.ctx.model.BookComment.update(record, { where });
+  updateBookComment(record: BookCommentRecord, opts: object) {
+    return this.ctx.model.BookComment.update(record, opts);
   }
 
   async processBookCommentAction(bookCommentId: string|number, action: BookCommentAction) {
-    let { likeUserIdList, dislikeUserIdList } = await this.getBookCommentInfo(bookCommentId);
+    let { likeUserIdList, dislikeUserIdList, userId } = await this.getBookCommentInfo({ id: bookCommentId });
     const loginUserId = this.service.user.getLoginCookie();
+    let isFirstCommentAction: boolean = true;
+    if (likeUserIdList.includes(loginUserId) || dislikeUserIdList.includes(loginUserId)) {
+      isFirstCommentAction = false;
+    }
     if (action === 'like') {
       likeUserIdList = [...new Set(likeUserIdList.concat(loginUserId))];
-      dislikeUserIdList = dislikeUserIdList.filter((userId: string) => userId !== loginUserId);
+      dislikeUserIdList = dislikeUserIdList.filter((userId: number) => userId !== loginUserId);
     } else {
-      likeUserIdList = likeUserIdList.filter((userId: string) => userId !== loginUserId);
+      likeUserIdList = likeUserIdList.filter((userId: number) => userId !== loginUserId);
       dislikeUserIdList = [...new Set(dislikeUserIdList.concat(loginUserId))];
     }
-    await this.updateBookComment({ likeUserIdList, dislikeUserIdList }, { id: bookCommentId });
+    const where = { id: bookCommentId };
+    return this.ctx.model.transaction(async t => {
+      await this.updateBookComment({ likeUserIdList, dislikeUserIdList }, { where, transaction: t });
+      if (action === 'like') {
+        await this.service.user.updateUserCoinNumber(
+          userId,
+          this.ctx.constant.CREATE_BOOK_COMMENT_ACTION_CHANGE_NUMBER,
+          { transaction: t },
+        );
+      }
+      if (isFirstCommentAction) {
+        await this.service.user.updateUserCoinNumber(
+          loginUserId,
+          this.ctx.constant.CREATE_BOOK_COMMENT_ACTION_CHANGE_NUMBER,
+          { transaction: t },
+        );
+      }
+    });
   }
 }

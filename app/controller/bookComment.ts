@@ -50,9 +50,9 @@ export default class BookCommentController extends Controller {
   async updateBookComment() {
     try {
       const { bookCommentId } = this.ctx.params;
-      const { userId } = await this.service.bookComment.getBookCommentInfo(bookCommentId);
+      const { userId } = await this.service.bookComment.getBookCommentInfo({ id: bookCommentId });
       const loginUserId = this.service.user.getLoginCookie();
-      if (Number(userId) !== Number(loginUserId)) {
+      if (userId !== loginUserId) {
         this.ctx.body = {
           code: this.ctx.constant.NO_AUTH_CODE,
           message: '暂无权限',
@@ -64,7 +64,7 @@ export default class BookCommentController extends Controller {
       const updatedAt = moment().format('YYYY-MM-DD hh:mm:ss');
       const record = { content, updatedAt };
       const where = { id: bookCommentId };
-      await this.service.bookComment.updateBookComment(record, where);
+      await this.service.bookComment.updateBookComment(record, { where });
       this.ctx.body = '';
     } catch (error) {
       this.logger.error(error);

@@ -2,7 +2,7 @@ import { Context } from 'egg';
 
 export default function checkLogin(): any {
   return async (ctx: Context, next: () => Promise<any>) => {
-    const userId: string = ctx.service.user.getLoginCookie();
+    const userId: number = ctx.service.user.getLoginCookie();
     if (!userId) {
       ctx.body = {
         code: ctx.constant.NEED_LOGIN_CODE,

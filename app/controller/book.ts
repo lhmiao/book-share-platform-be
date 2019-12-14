@@ -52,7 +52,7 @@ export default class BookController extends Controller {
 
   async createBook() {
     try {
-      const createBookKeys = ['bookName', 'intro', 'picture', 'price'];
+      const createBookKeys = ['bookName', 'intro', 'picture', 'price', 'onSell'];
       const params = _.pick(this.ctx.request.body, createBookKeys);
       params.keeperId = this.service.user.getLoginCookie();
       const chain = new this.ctx.Chain();
@@ -73,11 +73,11 @@ export default class BookController extends Controller {
   async updateBook() {
     try {
       const { bookId } = this.ctx.params;
-      const updateBookKeys = ['bookName', 'intro', 'picture', 'keeperId', 'price'];
+      const updateBookKeys = ['bookName', 'intro', 'picture', 'price', 'onSell'];
       const params = _.pick(this.ctx.request.body, updateBookKeys);
       const { recordChain, ...restInfo } = await this.service.book.getBookInfo(bookId, true);
       const loginUserId = this.service.user.getLoginCookie();
-      if (Number(loginUserId) !== restInfo.keeperId) {
+      if (loginUserId !== restInfo.keeperId) {
         this.ctx.body = {
           code: this.ctx.constant.NO_AUTH_CODE,
           message: '暂无权限',
@@ -91,33 +91,33 @@ export default class BookController extends Controller {
         const KEY_EXPLAIN = {
           bookName: '图书名',
           intro: '简介',
-          keeperId: '持有者',
           price: '价格',
         };
-        let prevKeeperUsername: string;
-        let curKeeperUsername: string;
-        if (diff.keeperId) {
-          const [prevKeeperId, curKeeperId] = diff.keeperId.split(' => ');
-          const [prevKeeper, curKeeper] = await Promise.all([
-            this.service.user.getUserInfo({ id: prevKeeperId }),
-            this.service.user.getUserInfo({ id: curKeeperId }),
-          ]);
-          prevKeeperUsername = prevKeeper.username;
-          curKeeperUsername = curKeeper.username;
-        }
         const data = Object.entries(diff).reduce((data, [key, diffInfo]) => {
-          if (key === 'keeperId') {
-            data += `${KEY_EXPLAIN[key]}: ${prevKeeperUsername} => ${curKeeperUsername};`;
-          } else {
-            data += `${KEY_EXPLAIN[key]}: ${diffInfo};`;
-          }
+          data += `${KEY_EXPLAIN[key]}: ${diffInfo};`;
           return data;
         }, '');
         chain.addBlock(data);
         params.recordChain = chain.getValue();
-        await this.service.book.updateBook(params, { id: bookId });
+        const where = { id: bookId };
+        await this.service.book.updateBook(params, { where });
       }
       this.ctx.body = _.omit(params, ['recordChain']);
+    } catch (error) {
+      this.logger.error(error);
+      this.ctx.body = {
+        code: this.ctx.constant.ERROR_CODE,
+        message: error.name,
+        data: '',
+      };
+    }
+  }
+
+  async buyBook() {
+    try {
+      const { bookId } = this.ctx.params;
+      await this.service.book.buyBook(bookId);
+      this.ctx.body = '';
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {

@@ -55,7 +55,7 @@ export default class UserController extends Controller {
         'phone', 'qq', 'wechat', 'avatar',
       ];
       const params = _.pick(this.ctx.request.body, createUserKeys);
-      const userInfo = await this.service.user.create(params);
+      const userInfo = await this.service.user.createUser(params);
       this.service.user.setLoginCookie(userInfo.id);
       this.ctx.body = userInfo;
     } catch (error) {
@@ -73,7 +73,8 @@ export default class UserController extends Controller {
       const updateUserKeys = ['username', 'phone', 'qq', 'wechat', 'avatar'];
       const params = _.omit(this.ctx.request.body, updateUserKeys);
       const userId = this.service.user.getLoginCookie();
-      await this.service.user.update(params, { id: userId });
+      const where = { id: userId };
+      await this.service.user.updateUserInfo(params, { where });
       this.ctx.body = params;
     } catch (error) {
       this.logger.error(error);
@@ -114,7 +115,7 @@ export default class UserController extends Controller {
         };
         return;
       }
-      await this.service.user.update({ password }, where);
+      await this.service.user.updateUserInfo({ password }, { where });
       this.service.user.clearLoginCookie();
       this.ctx.body = '';
     } catch (error) {

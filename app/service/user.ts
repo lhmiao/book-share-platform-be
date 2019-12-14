@@ -26,8 +26,9 @@ export default class UserService extends Service {
     this.ctx.cookies.set('user_id', '', { maxAge: 0 });
   }
 
-  getLoginCookie(): string {
-    return this.ctx.cookies.get('user_id', { encrypt: true });
+  getLoginCookie(): number {
+    const userId = this.ctx.cookies.get('user_id', { encrypt: true });
+    return Number(userId);
   }
 
   async getUserInfo(where: UserInfo) {
@@ -36,20 +37,20 @@ export default class UserService extends Service {
     return record.get({ plain: true });
   }
 
-  async create(record: UserInfo) {
-    const result = await this.ctx.model.User.create(record);
+  async createUser(record: UserInfo, opts: object = {}) {
+    const result = await this.ctx.model.User.create(record, opts);
     return result.get({ plain: true });
   }
 
-  update(record: UserInfo, where: UserInfo) {
-    return this.ctx.model.User.update(record, { where });
+  updateUserInfo(record: UserInfo, opts: object) {
+    return this.ctx.model.User.update(record, opts);
   }
 
-  async updateUserCoinNumber(userId: string|number, changeNumber: number) {
+  async updateUserCoinNumber(userId: number|string, changeNumber: number, opts: object = {}) {
     const where = { id: userId };
     const { coinNumber: originCoinNumber } = await this.getUserInfo(where);
     const coinNumber = originCoinNumber + changeNumber;
-    await this.update({ coinNumber }, where);
+    await this.updateUserInfo({ coinNumber }, { where, ...opts });
     return { coinNumber };
   }
 }
