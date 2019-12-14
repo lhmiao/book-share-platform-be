@@ -33,6 +33,7 @@ export default class UserService extends Service {
 
   async getUserInfo(where: UserInfo, opts: object = {}) {
     const record = await this.ctx.model.User.findOne({ where, ...opts });
+    if (!record) return Promise.reject({ name: '用户不存在' });
     return record.get({ plain: true });
   }
 

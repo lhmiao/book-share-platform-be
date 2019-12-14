@@ -51,7 +51,11 @@ export default class UserController extends Controller {
 
   async createUser() {
     try {
-      const params = _.omit(this.ctx.request.body, ['id', 'coinNumber']);
+      const createUserKeys = [
+        'username', 'password', 'securityQuestion', 'securityAnswer',
+        'phone', 'qq', 'wechat', 'avatar',
+      ];
+      const params = _.pick(this.ctx.request.body, createUserKeys);
       const userInfo = await this.service.user.create(params);
       this.service.user.setLoginCookie(userInfo.id);
       this.ctx.body = userInfo;
@@ -67,7 +71,8 @@ export default class UserController extends Controller {
 
   async updateUser() {
     try {
-      const params = _.omit(this.ctx.request.body, ['id', 'securityQuestion', 'securityAnswer', 'coinNumber']);
+      const updateUserKeys = ['username', 'phone', 'qq', 'wechat', 'avatar'];
+      const params = _.omit(this.ctx.request.body, updateUserKeys);
       const userId = this.service.user.getLoginCookie();
       await this.service.user.update(params, { id: userId });
       this.ctx.body = params;
