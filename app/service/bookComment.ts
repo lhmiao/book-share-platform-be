@@ -67,6 +67,13 @@ export default class BookCommentService extends Service {
     return { bookCommentList, pageInfo };
   }
 
+  async getBookCommentInfo(bookCommentId: number|string) {
+    const where = { id: bookCommentId };
+    const record = await this.ctx.model.BookComment.findOne({ where });
+    if (!record) return Promise.reject({ name: `id 为${bookCommentId}的评论不存在` });
+    return record.get({ plain: true });
+  }
+
   async createBookComment(record: BookCommentRecord) {
     const result = await this.ctx.model.BookComment.create(record);
     return result.get({ plain: true });
@@ -77,12 +84,7 @@ export default class BookCommentService extends Service {
   }
 
   async processBookCommentAction(bookCommentId: string|number, action: BookCommentAction) {
-    const where = { id: bookCommentId };
-    const record = await this.ctx.model.BookComment.findOne({
-      where,
-      attributes: ['likeUserIdList', 'dislikeUserIdList'],
-    });
-    let { likeUserIdList, dislikeUserIdList } = record.get({ plain: true });
+    let { likeUserIdList, dislikeUserIdList } = await this.getBookCommentInfo(bookCommentId);
     const loginUserId = this.service.user.getLoginCookie();
     if (action === 'like') {
       likeUserIdList = [...new Set(likeUserIdList.concat(loginUserId))];
@@ -91,6 +93,6 @@ export default class BookCommentService extends Service {
       likeUserIdList = likeUserIdList.filter((userId: string) => userId !== loginUserId);
       dislikeUserIdList = [...new Set(dislikeUserIdList.concat(loginUserId))];
     }
-    await this.updateBookComment({ likeUserIdList, dislikeUserIdList }, where);
+    await this.updateBookComment({ likeUserIdList, dislikeUserIdList }, { id: bookCommentId });
   }
 }
