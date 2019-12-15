@@ -6,7 +6,8 @@ export interface BookInfo {
   intro?: string;
   pictrue?: Blob;
   recordChain?: any[];
-  keeperId?: number|string;
+  keeperId?: number;
+  price?: number;
   onSell?: boolean;
 }
 
@@ -44,7 +45,7 @@ export default class BookService extends Service {
     return { bookList, pageInfo };
   }
 
-  async getBookInfo(bookId: string|number, needRecordChain: boolean = false): Promise<BookInfo> {
+  async getBookInfo(bookId: string|number, needRecordChain: boolean = false) {
     const exclude: string[] = ['keeperId'];
     if (!needRecordChain) exclude.push('recordChain');
 
@@ -99,7 +100,7 @@ export default class BookService extends Service {
   async buyBook(bookId: number|string) {
     const loginUserId = this.service.user.getLoginCookie();
 
-    const { keeperId, recordChain, price, onSell } = await this.service.book.getBookInfo(bookId, true);
+    const { keeper: { id: keeperId }, recordChain, price, onSell } = await this.service.book.getBookInfo(bookId, true);
     if (!onSell) return Promise.reject({ name: '该图书未在售' });
     if (loginUserId === keeperId) return Promise.reject({ name: '买卖双方是同一人' });
 
@@ -108,14 +109,20 @@ export default class BookService extends Service {
 
     const { username: sellerName } = await this.service.user.getUserInfo({ id: keeperId });
     const chain = new this.ctx.Chain(recordChain);
-    chain.addBlock(`${sellerName}将书以${price}图书币的价格卖给了${buyerName}`);
+    chain.addBlock(`${sellerName}(id ${keeperId})将书以${price}图书币的价格卖给了${buyerName}(id ${loginUserId})`);
 
     return this.ctx.model.transaction(t => Promise.all([
-      this.service.book.updateBook({
-        keeperId: loginUserId,
-        onSell: false,
-        recordChain: chain.getValue(),
-      }, { transaction: t }),
+      this.service.book.updateBook(
+        {
+          keeperId: loginUserId,
+          onSell: false,
+          recordChain: chain.getValue(),
+        },
+        {
+          where: { id: bookId },
+          transaction: t,
+        },
+      ),
       this.service.user.updateUserCoinNumber(
         loginUserId,
         -price,

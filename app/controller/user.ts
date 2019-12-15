@@ -6,14 +6,6 @@ export default class UserController extends Controller {
     try {
       const { username, password } = this.ctx.request.body;
       const userInfo = await this.service.user.getUserInfo({ username });
-      if (!userInfo) {
-        this.ctx.body = {
-          code: this.ctx.constant.ERROR_CODE,
-          message: '用户不存在',
-          data: '',
-        };
-        return;
-      }
       if (password !== userInfo.password) {
         this.ctx.body = {
           code: this.ctx.constant.ERROR_CODE,
@@ -60,9 +52,12 @@ export default class UserController extends Controller {
       this.ctx.body = userInfo;
     } catch (error) {
       this.logger.error(error);
+      const message = error.name === 'SequelizeUniqueConstraintError'
+        ? '该用户名已存在'
+        : error.name;
       this.ctx.body = {
         code: this.ctx.constant.ERROR_CODE,
-        message: error.name,
+        message,
         data: '',
       };
     }
