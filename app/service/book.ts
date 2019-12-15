@@ -75,21 +75,7 @@ export default class BookService extends Service {
   }
 
   async createBook(record: BookInfo, opts: object = {}) {
-    const result = await this.ctx.model.transaction(async t => {
-      const loginUserId = this.service.user.getLoginCookie();
-
-      const [result] = await Promise.all([
-        this.ctx.model.Book.create(record, { ...opts, transaction: t }),
-        this.service.user.updateUserCoinNumber(
-          loginUserId,
-          this.ctx.constant.CREATE_BOOK_CHANGE_NUMBER,
-          { transaction: t },
-        ),
-      ]);
-
-      return result;
-    });
-
+    const result = await this.ctx.model.Book.create(record, { ...opts });
     return result.get({ plain: true });
   }
 
@@ -111,6 +97,7 @@ export default class BookService extends Service {
     const chain = new this.ctx.Chain(recordChain);
     chain.addBlock(`${sellerName}(id ${keeperId})将书以${price}图书币的价格卖给了${buyerName}(id ${loginUserId})`);
 
+    const { CREATE_BOOK_BUSINESS_CHANGE_NUMBER } = this.ctx.constant;
     return this.ctx.model.transaction(t => Promise.all([
       this.service.book.updateBook(
         {
@@ -125,12 +112,12 @@ export default class BookService extends Service {
       ),
       this.service.user.updateUserCoinNumber(
         loginUserId,
-        -price,
+        -price + CREATE_BOOK_BUSINESS_CHANGE_NUMBER,
         { transaction: t },
       ),
       this.service.user.updateUserCoinNumber(
         keeperId,
-        price,
+        price + CREATE_BOOK_BUSINESS_CHANGE_NUMBER,
         { transaction: t },
       ),
     ]));
