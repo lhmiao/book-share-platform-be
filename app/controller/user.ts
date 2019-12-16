@@ -49,7 +49,7 @@ export default class UserController extends Controller {
       const params = _.pick(this.ctx.request.body, createUserKeys);
       const userInfo = await this.service.user.createUser(params);
       this.service.user.setLoginCookie(userInfo.id);
-      this.ctx.body = userInfo;
+      this.ctx.body = _.omit(userInfo, ['securityAnswer', 'password']);
     } catch (error) {
       this.logger.error(error);
       const message = error.name === 'SequelizeUniqueConstraintError'
@@ -98,10 +98,10 @@ export default class UserController extends Controller {
 
   async updatePassword() {
     try {
+      const { securityAnswer: needValidateAnswer, password, username } = this.ctx.request.body;
       const userId = this.service.user.getLoginCookie();
-      const where = { id: userId };
+      const where = userId ? { id: userId } : { username };
       const { securityAnswer: correctAnswer } = await this.service.user.getUserInfo(where);
-      const { securityAnswer: needValidateAnswer, password } = this.ctx.request.body;
       if (correctAnswer !== needValidateAnswer) {
         this.ctx.body = {
           code: this.ctx.constant.ERROR_CODE,
@@ -113,6 +113,30 @@ export default class UserController extends Controller {
       await this.service.user.updateUserInfo({ password }, { where });
       this.service.user.clearLoginCookie();
       this.ctx.body = '';
+    } catch (error) {
+      this.logger.error(error);
+      this.ctx.body = {
+        code: this.ctx.constant.ERROR_CODE,
+        message: error.name,
+        data: '',
+      };
+    }
+  }
+
+  async checkLogin() {
+    try {
+      const userId = this.service.user.getLoginCookie();
+      if (!userId) {
+        this.ctx.body = {
+          code: this.ctx.constant.NEED_LOGIN_CODE,
+          message: '用户未登录',
+          data: '',
+        };
+        return;
+      }
+      const where = { id: userId };
+      const userInfo = await this.service.user.getUserInfo(where);
+      this.ctx.body = _.omit(userInfo, ['securityAnswer', 'password']);
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {

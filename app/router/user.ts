@@ -9,4 +9,5 @@ export default (app: Application) => {
   router.patch('/api/v1/user', controller.user.updateUser);
   router.get('/api/v1/user/security_question', controller.user.getSecurityQuestion);
   router.put('/api/v1/user/password', controller.user.updatePassword);
+  router.get('/api/v1/user/check_login', controller.user.checkLogin);
 };

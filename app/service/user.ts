@@ -26,8 +26,9 @@ export default class UserService extends Service {
     this.ctx.cookies.set('user_id', '', { maxAge: 0 });
   }
 
-  getLoginCookie(): number {
-    const userId = this.ctx.cookies.get('user_id', { encrypt: true });
+  getLoginCookie(): number|undefined {
+    const userId = this.ctx.cookies.get('user_id', { encrypt: true }) as string|undefined;
+    if (userId === undefined) return userId;
     return Number(userId);
   }
 

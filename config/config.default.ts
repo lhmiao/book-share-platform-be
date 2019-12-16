@@ -8,11 +8,12 @@ export default (appInfo: EggAppInfo) => {
   config.middleware = ['processResBody', 'checkLogin'];
 
   config.checkLogin = {
-    ignore: [ // 登录、注册、获取安全问题、修改密码接口不检测登录状态
+    ignore: [ // 登录、注册、获取安全问题、修改密码、检查登录接口不检测登录状态
       '/api/v1/user/login',
       '/api/v1/user/register',
       '/api/v1/user/security_question',
       '/api/v1/user/password',
+      '/api/v1/user/check_login',
     ],
   };
 
