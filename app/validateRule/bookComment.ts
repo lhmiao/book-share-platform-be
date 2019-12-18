@@ -5,12 +5,12 @@ export default {
     '/api/v1/book_comment/:bookId': {
       page: {
         type: 'string',
-        format: /^[1-9]\d*$/,
+        format: /^\d*$/,
         required: false,
       },
       pageSize: {
         type: 'string',
-        format: /^[1-9]\d*$/,
+        format: /^\d*$/,
         required: false,
       },
       bookId: 'id',

@@ -5,12 +5,12 @@ export default {
     '/api/v1/book': {
       page: {
         type: 'string',
-        format: /^[1-9]\d*$/,
+        format: /^\d*$/,
         required: false,
       },
       pageSize: {
         type: 'string',
-        format: /^[1-9]\d*$/,
+        format: /^\d*$/,
         required: false,
       },
       bookName: { type: 'string', required: false },
