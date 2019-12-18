@@ -23,7 +23,7 @@ export default {
   },
   put: {
     '/api/v1/user/password': {
-      username: { type: 'string', max: 50 },
+      username: { type: 'string', max: 50, required: false },
       securityAnswer: { type: 'string', max: 50 },
       password: { type: 'string', max: 50 },
     },

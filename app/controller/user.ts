@@ -66,11 +66,11 @@ export default class UserController extends Controller {
   async updateUser() {
     try {
       const updateUserKeys = ['username', 'phone', 'qq', 'wechat', 'avatar'];
-      const params = _.omit(this.ctx.request.body, updateUserKeys);
+      const params = _.pick(this.ctx.request.body, updateUserKeys);
       const userId = this.service.user.getLoginCookie();
       const where = { id: userId };
       await this.service.user.updateUserInfo(params, { where });
-      this.ctx.body = params;
+      this.ctx.body = await this.service.user.getUserInfo(where);
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
