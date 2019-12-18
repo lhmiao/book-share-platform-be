@@ -4,11 +4,11 @@ import _ from 'lodash';
 export default class BookController extends Controller {
   async getBookList() {
     try {
-      const { page = 1, pageSize = 10, ...restQuery } = this.ctx.query;
+      const { page = 1, pageSize = 10, onlyOnSell = 0 } = this.ctx.query;
       const params = {
         page: Number(page),
         pageSize: Number(pageSize),
-        ...restQuery,
+        onlyOnSell: Number(onlyOnSell),
       };
       this.ctx.body = await this.service.book.getBookList(params);
     } catch (error) {

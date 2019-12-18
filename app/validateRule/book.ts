@@ -13,6 +13,12 @@ export default {
         format: /^[1-9]\d*$/,
         required: false,
       },
+      bookName: { type: 'string', required: false },
+      onlyOnSell: {
+        type: 'string',
+        format: /^0|1$/,
+        required: false,
+      },
     },
     '/api/v1/book/:bookId': {
       bookId: 'id',

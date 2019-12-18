@@ -15,15 +15,19 @@ export interface GetBookListParams {
   page: number;
   pageSize: number;
   bookName?: string;
+  onlyOnSell: number;
 }
 
 export default class BookService extends Service {
   async getBookList(params: GetBookListParams) {
-    const { page, pageSize, bookName } = params;
+    const { page, pageSize, bookName, onlyOnSell } = params;
     const { Op } = this.ctx.model;
     const where = {} as any;
     if (bookName) {
       where.bookName = { [Op.like]: `%${bookName}%` };
+    }
+    if (onlyOnSell) {
+      where.onSell = true;
     }
     const offset = (page - 1) * pageSize;
     const limit = pageSize;
@@ -111,7 +115,7 @@ export default class BookService extends Service {
         },
       ),
       this.service.user.updateUserCoinNumber(
-        loginUserId,
+        loginUserId as number,
         -price + CREATE_BOOK_BUSINESS_CHANGE_NUMBER,
         { transaction: t },
       ),
