@@ -1,5 +1,6 @@
 import { Controller } from 'egg';
 import _ from 'lodash';
+import path from 'path';
 
 export default class BookController extends Controller {
   async getBookList() {
@@ -52,14 +53,24 @@ export default class BookController extends Controller {
 
   async createBook() {
     try {
-      const createBookKeys = ['bookName', 'intro', 'picture', 'price', 'onSell'];
+      const createBookKeys = ['bookName', 'intro', 'price', 'onSell', 'author'];
       const params = _.pick(this.ctx.request.body, createBookKeys);
+      params.price = Number(params.price);
+      params.onSell = params.onSell === 'true' ? true : false;
       params.keeperId = this.service.user.getLoginCookie();
       const chain = new this.ctx.Chain();
       chain.addBlock('创建图书');
       params.recordChain = chain.getValue();
-      const record = await this.service.book.createBook(params);
-      this.ctx.body = _.omit(record, ['recordChain']);
+      const { id } = await this.service.book.createBook(params);
+      const preview = this.ctx.request.files[0];
+      const { filepath } = preview;
+      const extname = path.extname(filepath);
+      const previewSrc = await this.service.file.uploadBookPreview(`${id}${extname}`, filepath);
+      const record = { previewSrc };
+      const where = { id };
+      await this.service.book.updateBook(record, { where });
+      this.ctx.cleanupRequestFiles();
+      this.ctx.body = '';
     } catch (error) {
       this.logger.error(error);
       this.ctx.body = {
@@ -73,7 +84,7 @@ export default class BookController extends Controller {
   async updateBook() {
     try {
       const { bookId } = this.ctx.params;
-      const updateBookKeys = ['bookName', 'intro', 'picture', 'price', 'onSell'];
+      const updateBookKeys = ['bookName', 'intro', 'price', 'onSell', 'author'];
       const params = _.pick(this.ctx.request.body, updateBookKeys);
       const { recordChain, ...restInfo } = await this.service.book.getBookInfo(bookId, true);
       const loginUserId = this.service.user.getLoginCookie();
@@ -85,13 +96,14 @@ export default class BookController extends Controller {
         };
         return;
       }
-      const diff = this.ctx.helper.diffObj(params, restInfo, ['picture']);
+      const diff = this.ctx.helper.diffObj(params, restInfo);
       if (diff) {
         const chain = new this.ctx.Chain(recordChain);
         const KEY_EXPLAIN = {
           bookName: '图书名',
           intro: '简介',
           price: '价格',
+          author: '作者',
         };
         const data = Object.entries(diff).reduce((data, [key, diffInfo]) => {
           data += `${KEY_EXPLAIN[key]}: ${diffInfo};`;
@@ -125,6 +137,16 @@ export default class BookController extends Controller {
         message: error.name,
         data: '',
       };
+    }
+  }
+
+  async getBookPreviewImg() {
+    try {
+      const { bookId } = this.ctx.params;
+      const previewSrc = await this.service.book.getBookPreviewSrc(bookId);
+      this.ctx.body = await this.ctx.helper.fsReadFile(previewSrc);
+    } catch (error) {
+      this.logger.error(error);
     }
   }
 }

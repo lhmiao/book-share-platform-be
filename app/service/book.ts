@@ -9,6 +9,8 @@ export interface BookInfo {
   keeperId?: number;
   price?: number;
   onSell?: boolean;
+  previewSrc?: string;
+  author?: string;
 }
 
 export interface GetBookListParams {
@@ -34,7 +36,7 @@ export default class BookService extends Service {
 
     const { rows, count } = await this.ctx.model.Book.findAndCountAll({
       where,
-      attributes: { exclude: ['recordChain', 'keeperId'] },
+      attributes: { exclude: ['recordChain', 'keeperId', 'previewSrc'] },
       offset,
       limit,
     });
@@ -50,7 +52,7 @@ export default class BookService extends Service {
   }
 
   async getBookInfo(bookId: string|number, needRecordChain: boolean = false) {
-    const exclude: string[] = ['keeperId'];
+    const exclude: string[] = ['keeperId', 'previewSrc'];
     if (!needRecordChain) exclude.push('recordChain');
 
     const record = await this.ctx.model.Book.findOne({
@@ -125,5 +127,16 @@ export default class BookService extends Service {
         { transaction: t },
       ),
     ]));
+  }
+
+  async getBookPreviewSrc(bookId: string|number) {
+    const record = await this.ctx.model.Book.findOne({
+      where: { id: bookId },
+      attributes: ['previewSrc'],
+    });
+
+    if (!record) return Promise.reject({ name: `id 为${bookId}的图书不存在` });
+
+    return record.get({ plain: true }).previewSrc;
   }
 }

@@ -9,4 +9,5 @@ export default (app: Application) => {
   router.put('/api/v1/book/:bookId', controller.book.updateBook);
   router.get('/api/v1/book/:bookId/record_chain', controller.book.getBookRecordChain);
   router.get('/api/v1/book/:bookId/buy', controller.book.buyBook);
+  router.get('/book/:bookId/preview', controller.book.getBookPreviewImg);
 };

@@ -53,4 +53,8 @@ export const constant = {
   CREATE_BOOK_BUSINESS_CHANGE_NUMBER: 5, // 完成交易奖励的图书币数额
   CREATE_BOOK_COMMENT_CHANGE_NUMBER: 3, // 第一次评论某个图书奖励的图书币数额
   CREATE_BOOK_COMMENT_ACTION_CHANGE_NUMBER: 1, // 评价某个评论奖励的图书币数额
+  // 图书预览图片上传路径
+  BOOK_PREVIEW_FILE_PATH: '/Users/lhm/Documents/project/book-share-file-service/book-preview',
+  // 用户头像上传路径
+  USER_AVATAR_FILE_PATH: '/Users/lhm/Documents/project/book-share-file-service/user-avatar',
 };

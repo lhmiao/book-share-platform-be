@@ -18,8 +18,8 @@ export default app => {
       type: TEXT,
       allowNull: true,
     },
-    picture: {
-      field: 'picture',
+    previewSrc: {
+      field: 'preview_src',
       type: BLOB,
       allowNull: true,
     },
@@ -60,6 +60,11 @@ export default app => {
       set(onSell: boolean) {
         (this as any).setDataValue('onSell', onSell ? 1 : 0);
       },
+    },
+    author: {
+      field: 'author',
+      type: STRING(50),
+      allowNull: false,
     },
   });
 
