@@ -17,5 +17,15 @@ export default (appInfo: EggAppInfo) => {
     ],
   };
 
+  config.processResBody = {
+    ignore: [ // 获取图书预览图片接口无需加工 body
+      '/book/:bookId/preview',
+    ],
+  };
+
+  config.multipart = {
+    mode: 'file',
+  };
+
   return config;
 };
