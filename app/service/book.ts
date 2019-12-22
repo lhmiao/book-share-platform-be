@@ -37,6 +37,11 @@ export default class BookService extends Service {
     const { rows, count } = await this.ctx.model.Book.findAndCountAll({
       where,
       attributes: { exclude: ['recordChain', 'keeperId', 'previewSrc'] },
+      include: [{
+        model: this.ctx.model.User,
+        attributes: ['id', 'username', 'phone', 'qq', 'wechat', 'avatar'],
+        as: 'keeper',
+      }],
       offset,
       limit,
     });
