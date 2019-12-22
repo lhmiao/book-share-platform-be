@@ -8,12 +8,14 @@ export default (appInfo: EggAppInfo) => {
   config.middleware = ['processResBody', 'checkLogin'];
 
   config.checkLogin = {
-    ignore: [ // 登录、注册、获取安全问题、修改密码、检查登录接口不检测登录状态
-      '/api/v1/user/login',
-      '/api/v1/user/register',
-      '/api/v1/user/security_question',
-      '/api/v1/user/password',
-      '/api/v1/user/check_login',
+    ignore: [ // 以下接口不检测登录状态
+      '/api/v1/user/login', // 登录
+      '/api/v1/user/register', // 注册
+      '/api/v1/user/security_question', // 获取安全问题
+      '/api/v1/user/password', // 修改密码
+      '/api/v1/user/check_login', // 检查登录
+      '/book/:bookId/preview', // 获取图书预览图
+      ({ method, path }) => (method.toLowerCase() === 'get' && path === '/api/v1/book'), // 获取图书列表
     ],
   };
 
