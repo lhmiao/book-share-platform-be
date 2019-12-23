@@ -5,12 +5,13 @@ import path from 'path';
 export default class BookController extends Controller {
   async getBookList() {
     try {
-      const { page = 1, pageSize = 10, onlyOnSell = 0 } = this.ctx.query;
+      const { page = 1, pageSize = 10, onlyOnSell = 0, keeperId } = this.ctx.query;
       const params = {
         page: Number(page),
         pageSize: Number(pageSize),
         onlyOnSell: Number(onlyOnSell),
-      };
+      } as any;
+      if (keeperId) params.keeperId = keeperId;
       this.ctx.body = await this.service.book.getBookList(params);
     } catch (error) {
       this.logger.error(error);

@@ -19,6 +19,7 @@ export default {
         format: /^(0|1)$/,
         required: false,
       },
+      keeperId: { type: 'id', required: false },
     },
     '/api/v1/book/:bookId': {
       bookId: 'id',

@@ -18,11 +18,12 @@ export interface GetBookListParams {
   pageSize: number;
   bookName?: string;
   onlyOnSell: number;
+  keeperId?: string|number;
 }
 
 export default class BookService extends Service {
   async getBookList(params: GetBookListParams) {
-    const { page, pageSize, bookName, onlyOnSell } = params;
+    const { page, pageSize, bookName, onlyOnSell, keeperId } = params;
     const { Op } = this.ctx.model;
     const where = {} as any;
     if (bookName) {
@@ -30,6 +31,9 @@ export default class BookService extends Service {
     }
     if (onlyOnSell) {
       where.onSell = true;
+    }
+    if (keeperId) {
+      where.keeperId = keeperId;
     }
     const offset = (page - 1) * pageSize;
     const limit = pageSize;
