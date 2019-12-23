@@ -117,16 +117,18 @@ export default class BookCommentService extends Service {
     const where = { id: bookCommentId };
     return this.ctx.model.transaction(async t => {
       await this.updateBookComment({ likeUserIdList, dislikeUserIdList }, { where, transaction: t });
+      // 自己评价自己的评论、已评价过，不增加图书币
+      if (userId === loginUserId || !isFirstCommentAction) return;
+      // 给作出评价的人增加图书币
+      await this.service.user.updateUserCoinNumber(
+        loginUserId,
+        this.ctx.constant.CREATE_BOOK_COMMENT_ACTION_CHANGE_NUMBER,
+        { transaction: t },
+      );
+      // 如果是点赞，给发布评论的人增加图书币
       if (action === 'like') {
         await this.service.user.updateUserCoinNumber(
           userId,
-          this.ctx.constant.CREATE_BOOK_COMMENT_ACTION_CHANGE_NUMBER,
-          { transaction: t },
-        );
-      }
-      if (isFirstCommentAction) {
-        await this.service.user.updateUserCoinNumber(
-          loginUserId,
           this.ctx.constant.CREATE_BOOK_COMMENT_ACTION_CHANGE_NUMBER,
           { transaction: t },
         );
