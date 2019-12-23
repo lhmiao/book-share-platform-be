@@ -15,7 +15,7 @@ export default (appInfo: EggAppInfo) => {
       '/api/v1/user/password', // 修改密码
       '/api/v1/user/check_login', // 检查登录
       '/book/:bookId/preview', // 获取图书预览图
-      ({ method, path }) => (method.toLowerCase() === 'get' && path === '/api/v1/book'), // 获取图书列表
+      ({ method, path }) => method === 'GET' && path === '/api/v1/book', // 获取图书列表
     ],
   };
 
