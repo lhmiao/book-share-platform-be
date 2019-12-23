@@ -31,13 +31,11 @@ export default class BookCommentService extends Service {
       attributes: { exclude: ['userId', 'bookId'] },
       offset,
       limit,
-      include: [
-        {
-          model: this.ctx.model.User,
-          attributes: ['id', 'username', 'phone', 'qq', 'wechat', 'avatar'],
-          as: 'user',
-        },
-      ],
+      include: [{
+        model: this.ctx.model.User,
+        attributes: ['id', 'username', 'phone', 'qq', 'wechat', 'avatar'],
+        as: 'commentUser',
+      }],
     });
 
     const loginUserId = this.service.user.getLoginCookie();

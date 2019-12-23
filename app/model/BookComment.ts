@@ -80,7 +80,7 @@ export default app => {
       foreignKey: 'userId',
       targetKey: 'id',
       constraints: false,
-      as: 'user',
+      as: 'commentUser',
     });
   };
 
