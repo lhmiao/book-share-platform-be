@@ -24,7 +24,7 @@ export interface GetBookListParams {
 export default class BookService extends Service {
   async getBookList(params: GetBookListParams) {
     const { page, pageSize, bookName, onlyOnSell, keeperId } = params;
-    const { Op } = this.ctx.model;
+    const { Op } = this.app.Sequelize;
     const where = {} as any;
     if (bookName) {
       where.bookName = { [Op.like]: `%${bookName}%` };

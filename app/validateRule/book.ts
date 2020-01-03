@@ -48,8 +48,8 @@ export default {
         required: false,
       },
       intro: { type: 'string', required: false },
-      price: { type: 'number', min: 0, required: false },
-      onSell: { type: 'boolean', required: false },
+      price: { type: 'string', format: /^\d+$/ },
+      onSell: { type: 'string', format: /^(true|false)$/ },
       author: {
         type: 'string',
         max: 50,

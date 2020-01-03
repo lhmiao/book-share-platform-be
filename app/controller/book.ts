@@ -5,13 +5,14 @@ import path from 'path';
 export default class BookController extends Controller {
   async getBookList() {
     try {
-      const { page = 1, pageSize = 10, onlyOnSell = 0, keeperId } = this.ctx.query;
+      const { page = 1, pageSize = 10, onlyOnSell = 0, keeperId, bookName } = this.ctx.query;
       const params = {
         page: Number(page),
         pageSize: Number(pageSize),
         onlyOnSell: Number(onlyOnSell),
       } as any;
       if (keeperId) params.keeperId = keeperId;
+      if (bookName) params.bookName = bookName;
       this.ctx.body = await this.service.book.getBookList(params);
     } catch (error) {
       this.logger.error(error);
@@ -70,7 +71,6 @@ export default class BookController extends Controller {
       const record = { previewSrc };
       const where = { id };
       await this.service.book.updateBook(record, { where });
-      this.ctx.cleanupRequestFiles();
       this.ctx.body = '';
     } catch (error) {
       this.logger.error(error);
@@ -79,6 +79,8 @@ export default class BookController extends Controller {
         message: error.name,
         data: '',
       };
+    } finally {
+      this.ctx.cleanupRequestFiles();
     }
   }
 
@@ -87,9 +89,10 @@ export default class BookController extends Controller {
       const { bookId } = this.ctx.params;
       const updateBookKeys = ['bookName', 'intro', 'price', 'onSell', 'author'];
       const params = _.pick(this.ctx.request.body, updateBookKeys);
+      params.onSell = params.onSell === 'true' ? true : false;
       const { recordChain, ...restInfo } = await this.service.book.getBookInfo(bookId, true);
       const loginUserId = this.service.user.getLoginCookie();
-      if (loginUserId !== restInfo.keeperId) {
+      if (loginUserId !== restInfo.keeper.id) {
         this.ctx.body = {
           code: this.ctx.constant.NO_AUTH_CODE,
           message: '暂无权限',
@@ -105,6 +108,7 @@ export default class BookController extends Controller {
           intro: '简介',
           price: '价格',
           author: '作者',
+          onSell: '是否可交易',
         };
         const data = Object.entries(diff).reduce((data, [key, diffInfo]) => {
           data += `${KEY_EXPLAIN[key]}: ${diffInfo};`;
